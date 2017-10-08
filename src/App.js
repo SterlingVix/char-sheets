@@ -7,6 +7,15 @@ import CardExample from './CardExample';
 import Sheet from './changeling/Sheet';
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      currentItem: '',
+      username: '',
+    };
+  }
+
   render() {
     return (
       <div className="App">

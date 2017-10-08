@@ -1,6 +1,6 @@
 import firebase from 'firebase';
 
-// <script src="https://www.gstatic.com/firebasejs/4.5.0/firebase.js"></script>
+// See: https://css-tricks.com/intro-firebase-react/
 
 // Initialize Firebase
 const config = {
@@ -12,3 +12,5 @@ const config = {
   messagingSenderId: "556363376751"
 };
 firebase.initializeApp(config);
+
+export default firebase;
