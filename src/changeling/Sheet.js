@@ -20,16 +20,96 @@ import ContentSend from 'material-ui/svg-icons/content/send';
 import ContentDrafts from 'material-ui/svg-icons/content/drafts';
 import Divider from 'material-ui/Divider';
 import ActionInfo from 'material-ui/svg-icons/action/info';
+import firebase from '../firebase';
 
 // http://www.material-ui.com/#/components/list
+const playerName = 'playername';
+const characterName = 'charactername';
+
+
+// NEXT: https://css-tricks.com/firebase-react-part-2-user-authentication/
 
 class Sheet extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      userId: 'Aaron',
+
+      stats: stats,
+      [playerName]: '',
+      [characterName]: '',
+      items: [],
+    };
+  }
+
 
   componentWillMount () {
-    this.setState({
-      stats: stats,
-    });
+    const firebaseKeyForUser = {
+      Aaron: '-KvuW1kV2uu-dLp_m5ji',
+    }[this.state.userId];
+
+      this.setState({
+        firebaseKey: firebaseKeyForUser,
+      });
   }
+
+  componentDidMount() {
+    // const itemsRef = firebase.database().ref('items').ref(this.state.firebaseKeyForUser);
+    // const itemsRef = firebase.database()['items'].ref(this.state.firebaseKeyForUser);
+    const itemsRef = firebase.database().ref(`items`);
+
+    itemsRef.on('value', (data) => {
+      // let items = data.val()[this.state.firebaseKeyForUser];
+      let items = data.val();
+
+      console.log(`  data`, data);
+      console.log(`  items`, items);
+      let newState = [];
+
+      for (let item in items) {
+        newState.push({
+          id: item,
+          [playerName]: items[item][playerName],
+          [characterName]: items[item][characterName]
+        });
+      }
+      this.setState({
+        items: newState
+      });
+    });
+
+  }
+
+  removeItem = (itemId) => {
+    const itemRef = firebase.database().ref(`/items/${itemId}`);
+    itemRef.remove();
+  };
+
+  postToFirebase = (event) => {
+    console.log(`  event.target.value`, event.target.value);
+
+    this.setState({
+      [event.target.name]: event.target.value
+    });
+  };
+
+  // Save to firebase
+  handleSubmit = (event) => {
+    event.preventDefault();
+
+    const itemsRef = firebase.database().ref('items').ref(this.state.firebaseKeyForUser);
+    const item = {
+      [playerName]: this.state[playerName],
+      [characterName]: this.state[characterName],
+    };
+
+    itemsRef.push(item);
+    this.setState({
+      [playerName]: '',
+      [characterName]: ''
+    });
+  };
 
   render () {
 
@@ -56,6 +136,15 @@ class Sheet extends Component {
       <div className="sheet">
         <Paper zDepth={2}>
           <h2>PlayerCharacter:</h2>
+
+          <form
+            onSubmit={this.handleSubmit}
+          >
+            <input type="text" name={playerName} placeholder="What's your name?" onChange={this.postToFirebase} value={this.state[playerName]} />
+            <input type="text" name={characterName} placeholder="What's your character's name?" onChange={this.postToFirebase} value={this.state[characterName]} />
+            <button>Save</button>
+          </form>
+
           <List>
             <ListItem
               primaryText="Chronicle"
